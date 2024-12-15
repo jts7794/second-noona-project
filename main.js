@@ -7,9 +7,17 @@
 
 let taskinput = document.getElementById("task-input");
 let addBtn = document.getElementById("add-button");
-let taskList = []
+let taskList = [];
+let mode = 'All';
+let filterList = [];
+let tabs = document.querySelectorAll(".task-tabs nav");
+
 
 addBtn.addEventListener("click",addTask);
+
+for(let i=0; i < tabs.length; i++ ){
+    tabs[i].addEventListener("click", function(event){filter(event)})
+}
 
 
 function addTask() {
@@ -19,29 +27,36 @@ function addTask() {
         isComplete: false
     }
     taskList.push(task)
+    filterList.push(task)
     render()  
 }
 
 
 function render(){
     let resultHTML = "";
-    
-    for(let i =0; i <taskList.length; i++) {
+    let list = []
+    if (mode === "All") {
+        list = taskList;
+    }else if (mode === "onGoing" || mode === "Done") {
+        list = filterList;
+    }
 
-        if(taskList[i].isComplete == true){
+    for(let i =0; i <list.length; i++) {
+
+        if(list[i].isComplete == true){
             resultHTML += `<div class="task">
-            <div class="task-done">${taskList[i].taskContent}</div>
+            <div class="task-done">${list[i].taskContent}</div>
             <div>
-                <button onclick="toggleComplete('${taskList[i].id}')">완료</button>
-                <button onclick="deleteTask('${taskList[i].id}')">삭제</button>
+                <button onclick="toggleComplete('${list[i].id}')">완료</button>
+                <button onclick="deleteTask('${list[i].id}')">삭제</button>
             </div>
         </div>`;
         }else {
             resultHTML += `<div class="task">
-            <div>${taskList[i].taskContent}</div>
+            <div>${list[i].taskContent}</div>
             <div>
-                <button onclick="toggleComplete('${taskList[i].id}')">완료</button>
-                <button onclick="deleteTask('${taskList[i].id}')">삭제</button>
+                <button onclick="toggleComplete('${list[i].id}')">완료</button>
+                <button onclick="deleteTask('${list[i].id}')">삭제</button>
             </div>
         </div>`;
         }
@@ -53,12 +68,14 @@ function render(){
 
 
 function toggleComplete(id) {
+    
     for(let i=0; i< taskList.length; i++){
         if(taskList[i].id == id){
             taskList[i].isComplete =  !taskList[i].isComplete
             break;
         }
     }
+
     render();
 }
 
@@ -67,11 +84,57 @@ function randomIDGenerate(){
 }
 
 function deleteTask(id) {
+
     for(let i=0; i< taskList.length; i++){
         if(taskList[i].id == id){
             taskList.splice(i,1)
             break;
         }
     }
+
+    for(let i=0; i< filterList.length; i++){
+        if(filterList[i].id == id){
+            filterList.splice(i,1)
+            break;
+        }
+    }
     render();
+}
+
+function filter(event) {
+    mode = event.target.id
+    filterList = []
+    if(mode === "All") {
+        //전체 리스트
+        render();
+    }else if(mode === "onGoing") {
+        //진행 중인 아이템을 보여준다
+        for(let i=0; i < taskList.length; i++ ){
+            if(taskList[i].isComplete === false){
+                filterList.push(taskList[i]);
+            }
+        }
+        render();
+    }else if(mode === "Done"){
+        for(let i=0; i < taskList.length; i++ ){
+            if(taskList[i].isComplete === true){
+                filterList.push(taskList[i]);
+            }
+        }
+        render();
+    }
+}    
+
+
+let horizontalUnderLine = document.getElementById("under-Line")
+let Menus = document.querySelectorAll("nav");
+
+Menus.forEach((menu) => 
+    menu.addEventListener("click", (e) => horizontalIndicator(e))
+);
+
+function horizontalIndicator(e) {
+    horizontalUnderLine.style.left = e.currentTarget.offsetLeft + "px";
+    horizontalUnderLine.style.width = e.currentTarget.offsetWidth + "px";
+    horizontalUnderLine.style.top = e.currentTarget.offsetTop +e.currentTarget.offsetHeight - 10 + "px";
 }
